@@ -14,7 +14,7 @@
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
     "prebuild": "npm run documentation",
-    "documentation": "tsx _generate-rules-docs.ts",
+    "documentation": "tsx bin/generate-rules-docs.ts",
     "documentation:watch": "nodemon -w ../src/rules -e js,ts --exec 'npm run documentation'"
   },
   "dependencies": {

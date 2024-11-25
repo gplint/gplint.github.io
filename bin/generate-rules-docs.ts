@@ -2,14 +2,13 @@ import path from 'node:path';
 import {promises as fs} from 'node:fs';
 import os from 'node:os';
 
-import {getAllRules} from '../src/rules.js';
-import {Documentation} from '../src/types.js';
 import * as glob from 'glob';
 
 const RULES_DOC_FOLDER = './docs/rules';
 const FILE_PREFIX = 'autogen-';
 
 async function buildErrorCodesDocumentation() {
+	const {getAllRules} = await import(`${process.env.GPLINT_PATH ?? '../../gplint'}/src/rules.js`)
 	const rules = await getAllRules();
 
 	await fs.mkdir(RULES_DOC_FOLDER, {recursive: true});
@@ -18,11 +17,11 @@ async function buildErrorCodesDocumentation() {
 
 	await Promise.all(previousRulesDocs.map(f => fs.unlink(f)));
 
-	return Promise.all(Object.entries(rules).filter(([, rule]) => rule.documentation)
-		.map(([name, rule]) => generateDocumentationFiles(name, rule.documentation)));
+	return Promise.all(Object.entries(rules).filter(([, rule]) => (rule as any).documentation)
+		.map(([name, rule]) => generateDocumentationFiles(name, (rule as any).documentation)));
 }
 
-async function generateDocumentationFiles(name: string, ruleDoc: Documentation) {
+async function generateDocumentationFiles(name: string, ruleDoc: any) {
 	const lines = [
 		'---',
 		`slug: ${name}`,

@@ -1,0 +1,69 @@
+name: Deploy Documentation Site
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    # Review gh actions docs if you want to further define triggers, paths, etc
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+
+jobs:
+  build:
+    name: Build Docusaurus
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gplint.github.io repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: gplint.github.io
+
+      - name: Checkout gplint repo
+        uses: actions/checkout@v4
+        with:
+          repository: gplint/gplint
+          path: gplint
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          #cache: npm
+
+      - name: Install gplint.github.io dependencies
+        run: npm --prefix gplint.github.io i
+
+      - name: Install gplint dependencies
+        run: npm --prefix gplint i
+
+      - name: Build site
+        run: npm --prefix gplint.github.io run build
+
+      - name: Upload Build Artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: gplint.github.io/build
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    name: Deploy to GitHub Pages
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
