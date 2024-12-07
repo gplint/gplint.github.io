@@ -10,7 +10,7 @@ on:
     # Review gh actions docs if you want to further define triggers, paths, etc
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
   repository_dispatch:
-    types: [trigger-workflow]
+    types: [deploy-documentation-site]
 
 jobs:
   build:
