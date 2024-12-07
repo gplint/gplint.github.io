@@ -40,6 +40,7 @@ const config: Config = {
 			{
 				docs: {
 					sidebarPath: './sidebars.ts',
+					showLastUpdateTime: true,
 				},
 				blog: {
 					showReadingTime: true,
