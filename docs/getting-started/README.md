@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-## About _GPLint_
+# About _GPLint_
 
 _GPLint_ is a tool for identifying and reporting on patterns found in Gherkin definition files, with the goal of making
 Gherkin definitions more consistent and avoiding bugs and mistakes.
