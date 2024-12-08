@@ -98,7 +98,7 @@ const config: Config = {
 						},
 						{
 							label: 'Rules',
-							to: '/docs/category/rules',
+							to: '/docs/rules',
 						},
 					],
 				},
