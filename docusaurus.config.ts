@@ -126,6 +126,10 @@ const config: Config = {
 							label: 'GitHub',
 							href: 'https://github.com/gplint/gplint',
 						},
+						{
+							label: 'npmjs',
+							href: 'https://www.npmjs.com/package/gplint',
+						},
 					],
 				},
 			],
