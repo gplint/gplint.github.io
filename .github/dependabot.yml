@@ -17,3 +17,14 @@ updates:
     schedule:
       interval: "daily"
     versioning-strategy: increase
+    groups:
+      docusaurus:
+        patterns:
+          - "*docusaurus*"
+      react:
+        patterns:
+          - "*react*"
+      typescript:
+        patterns:
+          - "typescript"
+          - "tsx"
