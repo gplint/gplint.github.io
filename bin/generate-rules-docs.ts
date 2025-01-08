@@ -18,16 +18,19 @@ async function buildErrorCodesDocumentation() {
 	await Promise.all(previousRulesDocs.map(f => fs.unlink(f)));
 
 	return Promise.all(Object.entries(rules).filter(([, rule]) => (rule as any).documentation)
-		.map(([name, rule]) => generateDocumentationFiles(name, (rule as any).documentation)));
+		.map(([name, rule]) => generateDocumentationFiles(name, rule)));
 }
 
-async function generateDocumentationFiles(name: string, ruleDoc: any) {
+async function generateDocumentationFiles(name: string, rule: any) {
+	const ruleDoc = rule.documentation;
+	const fixable = rule.fix !== undefined;
+
 	const lines = [
 		'---',
 		`slug: ${name}`,
-		`title: ${[name, ruleDoc.configuration?.length > 0 ? '⚙️' : undefined, ruleDoc.fixable ? '🪄' : undefined].filter(i => i).join(' ')}`,
+		`title: ${[name, ruleDoc.configuration?.length > 0 ? '⚙️' : undefined, fixable ? '🪄' : undefined].filter(i => i).join(' ')}`,
 		'---',
-		`# ${name}${ruleDoc.fixable ? ' 🪄' : ''}`,
+		`# ${name}${fixable ? ' 🪄' : ''}`,
 		ruleDoc.description,
 		'',
 	];

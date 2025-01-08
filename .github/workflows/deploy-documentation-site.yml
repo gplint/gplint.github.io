@@ -7,8 +7,6 @@ on:
   push:
     branches:
       - main
-    # Review gh actions docs if you want to further define triggers, paths, etc
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
   repository_dispatch:
     types: [deploy-documentation-site]
 
@@ -17,22 +15,74 @@ jobs:
     name: Build Docusaurus
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gplint.github.io repo
+      - name: Checkout gplint.github.io repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: gplint.github.io
 
-      - name: Checkout gplint repo
+      - name: Determine branch and fork for PR or fallback
+        id: branch-check
+        run: |
+          DEFAULT_BRANCH=main
+          DEFAULT_REPO=gplint/gplint
+          
+          TARGET_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          
+          if [[ "${TARGET_BRANCH}" == */gplint-pr-* ]]; then
+            PR_NUMBER=${TARGET_BRANCH#*/gplint-pr-}  # Get PR number
+            PR_NUMBER=${PR_NUMBER%/*}           # Strip "/merge" or "/head"
+            echo "Detected PR number: $PR_NUMBER"
+          
+          # Try to fetch information about the PR from gplint/gplint
+            echo "Fetching PR branch information for repo $DEFAULT_REPO and PR #$PR_NUMBER..."
+          
+            # Fetch PR details using GitHub API
+            PR_DETAILS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/$DEFAULT_REPO/pulls/$PR_NUMBER")
+
+            # Parse branch and fork info from the API response
+            TARGET_BRANCH=$(echo "$PR_DETAILS" | jq -r '.head.ref')
+            FORK_REPO=$(echo "$PR_DETAILS" | jq -r '.head.repo.full_name')
+
+            echo "Branch for PR: $TARGET_BRANCH"
+            echo "Fork Repository: $FORK_REPO"
+
+            # Verify the branch exists in the fork
+            FORK_BRANCH_EXISTS=$(git ls-remote --heads https://github.com/$FORK_REPO.git $TARGET_BRANCH | grep $TARGET_BRANCH || echo "")
+            if [ -n "$FORK_BRANCH_EXISTS" ]; then
+              echo "Using branch '$TARGET_BRANCH' from fork '$FORK_REPO'"
+              echo "branch=$TARGET_BRANCH" >> $GITHUB_ENV
+              echo "repo=$FORK_REPO" >> $GITHUB_ENV
+              exit 0
+            fi
+          else
+            echo "Not triggered by a pull request. Using the current branch. ${TARGET_BRANCH}"
+          fi
+
+          # Check if the branch exists in the default repository
+          echo "Checking branch in the default repository: $DEFAULT_REPO"
+          DEFAULT_BRANCH_EXISTS=$(git ls-remote --heads https://github.com/$DEFAULT_REPO.git $TARGET_BRANCH | grep $TARGET_BRANCH || echo "")
+          if [ -n "$DEFAULT_BRANCH_EXISTS" ]; then
+            echo "Using branch '$TARGET_BRANCH' from the default repository '$DEFAULT_REPO'"
+            echo "branch=$TARGET_BRANCH" >> $GITHUB_ENV
+            echo "repo=$DEFAULT_REPO" >> $GITHUB_ENV
+          else
+            echo "Branch '$TARGET_BRANCH' not found. Falling back to default branch '$DEFAULT_BRANCH'."
+            echo "branch=$DEFAULT_BRANCH" >> $GITHUB_ENV
+            echo "repo=$DEFAULT_REPO" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout gplint repository
         uses: actions/checkout@v4
         with:
-          repository: gplint/gplint
+          repository: ${{ env.repo }}
           path: gplint
+          ref: ${{ env.branch }} # Use the resolved branch and repository
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          #cache: npm
+          node-version: lts/*
 
       - name: Set site version
         run: npm --prefix gplint.github.io version $(node -p "require('./gplint/package.json').version") --allow-same-version --git-tag-version=false
@@ -57,12 +107,10 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
 
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
+      pages: write
+      id-token: write
 
-    # Deploy to the github-pages environment
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
