@@ -18,8 +18,8 @@
     "documentation:watch": "nodemon -w ../src/rules -e js,ts --exec 'npm run documentation'"
   },
   "dependencies": {
-    "@docusaurus/core": "3.8.0",
-    "@docusaurus/preset-classic": "3.8.0",
+    "@docusaurus/core": "3.8.1",
+    "@docusaurus/preset-classic": "3.8.1",
     "@mdx-js/react": "^3.1.0",
     "clsx": "^2.1.1",
     "docusaurus-lunr-search": "^3.6.0",
@@ -28,9 +28,9 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.8.0",
-    "@docusaurus/tsconfig": "3.8.0",
-    "@docusaurus/types": "3.8.0",
+    "@docusaurus/module-type-aliases": "3.8.1",
+    "@docusaurus/tsconfig": "3.8.1",
+    "@docusaurus/types": "3.8.1",
     "nodemon": "^3.1.10",
     "tsx": "^4.19.4",
     "typescript": "~5.8.3"
