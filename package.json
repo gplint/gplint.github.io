@@ -32,7 +32,7 @@
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
     "@types/node": "^25.3.0",
-    "glob": "^13.0.5",
+    "glob": "^13.0.6",
     "nodemon": "^3.1.11",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3"
