@@ -35,7 +35,7 @@
     "glob": "^13.0.6",
     "nodemon": "^3.1.14",
     "tsx": "^4.21.0",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.2"
   },
   "browserslist": {
     "production": [
